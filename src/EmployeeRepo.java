@@ -1,13 +1,14 @@
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class EmployeeRepo {
     private ArrayList<Employee> employeeList = new ArrayList<>();
     private Connection con = DBConnection.getConnection();
     private Statement stm = con.createStatement();
+    private PreparedStatement prepStmInser = con.prepareStatement("INSERT INTO employees (emp_no,birth_date,first_name,last_name,gender,hire_date)" +
+            "VALUES(?,?,?,?,?,?)");
+    private Scanner sc = new Scanner(System.in);
 
     public EmployeeRepo() throws SQLException {
     }
@@ -63,7 +64,43 @@ public class EmployeeRepo {
     }
 
     public void insertEmployee() {
-//ResultSet rs = stm.executeQuery("");
+        //System.out.print("employ id: ");
+        // int empId = sc.nextInt();
+        //System.out.print("employ birth date: ");
+        //Date birthDate = Date.valueOf(sc.nextLine());
+        System.out.print("birth Date: ");
+        String birthDate = sc.next();
+        System.out.print("first name: ");
+        String firstName = sc.next();
+        System.out.print("last name: ");
+        String lastName = sc.next();
+        System.out.print("gender: ");
+        String gender = sc.next();
+        System.out.print("hire date: ");
+        String hireDate = sc.next();
+
+
+        try {
+
+            //TO DO: get last id from employees table
+            ResultSet rs1 = stm.executeQuery("select max(emp_no) as emp_no from employees");//lllllllllllllllllll
+            //System.out.println());
+            rs1.next();
+            int empId = rs1.getInt("emp_no");
+            System.out.println(empId);
+            prepStmInser.setInt(1, empId + 1);
+            //prepStmInser.setDate(1, birthDate);
+            prepStmInser.setString(2, birthDate);
+            prepStmInser.setString(3, firstName);
+            prepStmInser.setString(4, lastName);
+            prepStmInser.setString(5, gender);
+            prepStmInser.setString(6, hireDate);
+
+            prepStmInser.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void updateEmployee() {
