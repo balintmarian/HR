@@ -8,4 +8,13 @@ public class Title {
         this.fromDate = fromDate;
         this.toDate = toDate;
     }
+
+    @Override
+    public String toString() {
+        return "Title{" +
+                "titleName='" + titleName + '\'' +
+                ", fromDate='" + fromDate + '\'' +
+                ", toDate='" + toDate + '\'' +
+                '}';
+    }
 }

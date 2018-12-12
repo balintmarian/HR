@@ -20,7 +20,8 @@ public class EmployeeRepo {
         try {
             // Connection con = connect.getConnection();
             Statement stm = con.createStatement();
-            ResultSet rs = stm.executeQuery("SELECT e.first_name,e.last_name,s.salary ,d.dept_name,t.title " +
+            // very long SELECT -->
+            ResultSet rs = stm.executeQuery("SELECT e.first_name,e.last_name,s.salary ,s.from_date as s_from_date,s.to_date as s_to_date,d.dept_name as d_dept_name,de.from_date as de_from_date,de.to_date as de_to_date,t.title,t.from_date as t_from_date,t.to_date as t_to_date " +
                     "FROM employees e " +
                     "INNER JOIN salaries s " +
                     "ON e.emp_no = s.emp_no " +
@@ -32,16 +33,30 @@ public class EmployeeRepo {
                     "ON e.emp_no=t.emp_no ");
             //"WHERE s.to_date='9999-01-01'"
 
-//            while (rs.next()) {
-//
-//            }
             while (rs.next()) {
-                System.out.println(rs.getString("first_name") + " - " +
-                        rs.getString("last_name") + " - " + "recent salary: " +
-                        rs.getString("salary") + " - " +
-                        rs.getString("dept_name") + " - " +
-                        rs.getString("title"));
+                employeeList.add(new Employee(
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        new Department(rs.getString("d_dept_name"),
+                                rs.getString("de_from_date"),
+                                rs.getString("de_to_date")),
+                        new Salary(rs.getLong("salary"),
+                                rs.getString("s_from_date"),
+                                rs.getString("s_to_date")),
+                        new Title(rs.getString("title"),
+                                rs.getString("t_from_date"),
+                                rs.getString("t_to_date"))));
             }
+            for (Employee e : employeeList) {
+                System.out.println(e.toString());
+            }
+//            while (rs.next()) {
+//                System.out.println(rs.getString("first_name") + " - " +
+//                        rs.getString("last_name") + " - " + "recent salary: " +
+//                        rs.getString("salary") + " - " +
+//                        rs.getString("dept_name") + " - " +
+//                        rs.getString("title"));
+//            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

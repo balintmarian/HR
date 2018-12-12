@@ -8,4 +8,13 @@ public class Department {
         this.fromDate = fromDate;
         this.toDate = toDate;
     }
+
+    @Override
+    public String toString() {
+        return "Department{" +
+                "departmentName='" + departmentName + '\'' +
+                ", fromDate='" + fromDate + '\'' +
+                ", toDate='" + toDate + '\'' +
+                '}';
+    }
 }
