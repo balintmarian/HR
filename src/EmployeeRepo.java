@@ -1,6 +1,9 @@
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Date;
 
 public class EmployeeRepo {
     private ArrayList<Employee> employeeList = new ArrayList<>();
@@ -8,9 +11,23 @@ public class EmployeeRepo {
     private Statement stm = con.createStatement();
     private PreparedStatement prepStmInser = con.prepareStatement("INSERT INTO employees (emp_no,birth_date,first_name,last_name,gender,hire_date)" +
             "VALUES(?,?,?,?,?,?)");
+    private PreparedStatement pstm = con.prepareStatement("select dept_no as deptId from departments where dept_name=?");
+    private PreparedStatement pstm1 = con.prepareStatement("insert into departments values (?,?)");
+    private PreparedStatement pstm2 = con.prepareStatement("insert into dept_emp values(?,?,?,?)");
     private Scanner sc = new Scanner(System.in);
 
     public EmployeeRepo() throws SQLException {
+    }
+
+    public Date getDate() throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Example: 2018-12-10");
+        String str = sc.nextLine();
+        Date date = sdf.parse(str);
+        sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        return date;
     }
 
     public void printEmployeeInfo() {
@@ -79,14 +96,14 @@ public class EmployeeRepo {
         System.out.print("hire date: ");
         String hireDate = sc.next();
 
-
+        int empId = -1;
         try {
 
             //TO DO: get last id from employees table
             ResultSet rs1 = stm.executeQuery("select max(emp_no) as emp_no from employees");//lllllllllllllllllll
             //System.out.println());
             rs1.next();
-            int empId = rs1.getInt("emp_no");
+            empId = rs1.getInt("emp_no");
             System.out.println(empId);
             prepStmInser.setInt(1, empId + 1);
             //prepStmInser.setDate(1, birthDate);
@@ -97,10 +114,41 @@ public class EmployeeRepo {
             prepStmInser.setString(6, hireDate);
 
             prepStmInser.execute();
+
+            System.out.println("this employee work in dept: ");
+            //String dept=sc.next();
+            //ResultSet rs2=stm.executeQuery("select * from departments where dept_name='Sales'");
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
+        //if i find the deprtment for this employee il add him to it, if not i create the department
+        try {
+            String department = sc.next();
+            //String sql = "select dept_no from departments where dept_name=?";
+
+            pstm.setString(1, department);
+            pstm.execute();
+            ResultSet rs = pstm.getResultSet();
+            if (rs.next()) {
+                int deptId = rs.getInt("deptId");// get the dep id
+                //
+            } else {
+                ///create
+                ResultSet rsLastDeptId = stm.executeQuery("select max(dept_no) as deptId from departments");
+                rsLastDeptId.next();
+                //stm.executeQuery("")
+                pstm1.setString(1, rsLastDeptId.getString(1));
+                pstm1.setString(2, department);
+                pstm1.execute();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        //todo: link the created employee to the corresponding department in dept_emp
+        if (empId != -1) {
+            pstm2.setInt(1, empId);
+        }
     }
 
     public void updateEmployee() {
