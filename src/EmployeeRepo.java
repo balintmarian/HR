@@ -14,17 +14,23 @@ public class EmployeeRepo {
     private PreparedStatement pstm = con.prepareStatement("select dept_no as deptId from departments where dept_name=?");
     private PreparedStatement pstm1 = con.prepareStatement("insert into departments values (?,?)");
     private PreparedStatement pstm2 = con.prepareStatement("insert into dept_emp values(?,?,?,?)");
+    private PreparedStatement pstmDelete = con.prepareStatement("delete from employees where first_name=? and last_name=?");
     private Scanner sc = new Scanner(System.in);
 
     public EmployeeRepo() throws SQLException {
     }
 
-    public Date getDate() throws ParseException {
+    public Date getDate()  {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Scanner sc = new Scanner(System.in);
+        //Scanner sc = new Scanner(System.in);
         System.out.println("Example: 2018-12-10");
         String str = sc.nextLine();
-        Date date = sdf.parse(str);
+        Date date = null;
+        try {
+            date = sdf.parse(str);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         return date;
@@ -32,6 +38,9 @@ public class EmployeeRepo {
 
     public void printEmployeeInfo() {
         //ResultSet rs = stm.executeQuery("");
+        for (Employee e : employeeList) {
+            e.toString();
+        }
     }
 
     public void getEmployeesInfo() {
@@ -121,8 +130,9 @@ public class EmployeeRepo {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         //if i find the deprtment for this employee il add him to it, if not i create the department
+
+        String deptId = "0";
         try {
             String department = sc.next();
             //String sql = "select dept_no from departments where dept_name=?";
@@ -131,31 +141,62 @@ public class EmployeeRepo {
             pstm.execute();
             ResultSet rs = pstm.getResultSet();
             if (rs.next()) {
-                int deptId = rs.getInt("deptId");// get the dep id
+                deptId = rs.getString("deptId");// get the dep id
                 //
             } else {
                 ///create
                 ResultSet rsLastDeptId = stm.executeQuery("select max(dept_no) as deptId from departments");
                 rsLastDeptId.next();
                 //stm.executeQuery("")
-                pstm1.setString(1, rsLastDeptId.getString(1));
+                deptId = generateDeptId(rsLastDeptId.getString(1));
+                pstm1.setString(1, deptId);
                 pstm1.setString(2, department);
                 pstm1.execute();
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        //todo: link the created employee to the corresponding department in dept_emp
+        //todo: link the created employee to the corresponding department in dept_emp //DONE//
         if (empId != -1) {
-            pstm2.setInt(1, empId);
+            try {
+                pstm2.setInt(1, empId);
+                pstm2.setString(2, deptId);
+                pstm2.setDate(3,new java.sql.Date(getDate().getTime()));
+                pstm2.setDate(4, new java.sql.Date( getDate().getTime()));//date: 9999-01-01
+                pstm2.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public String generateDeptId(String lastDeptId) {
+        String deptIdSubString = lastDeptId.substring(1);
+        int deptIdNumber = Integer.parseInt(deptIdSubString);
+        //deptIdNumber++;
+        String deptIdNew = "d" + (deptIdNumber + 1);
+        return deptIdNew;
     }
 
     public void updateEmployee() {
 //ResultSet rs = stm.executeQuery("");
+
     }
 
     public void deleteEmployee() {
 //ResultSet rs = stm.executeQuery("");
+        System.out.println("Enter the last name of the employee you want to delete: ");
+        String firstName = sc.nextLine();
+        System.out.println("Enter the first name of the employee you want to delete: first name");
+        String lastName = sc.nextLine();
+
+        try {
+            pstmDelete.setString(1, firstName);
+            pstmDelete.setString(2, lastName);
+            pstmDelete.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
