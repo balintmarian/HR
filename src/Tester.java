@@ -11,6 +11,7 @@ public class Tester {
 
         try {
             EmployeeRepo employeeRepository = new EmployeeRepo();
+            employeeRepository.getEmployeesInfo();
             showMenu(employeeRepository);
 
             //h.getEmployeesInfo();

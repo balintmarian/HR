@@ -39,7 +39,7 @@ public class EmployeeRepo {
     public void printEmployeeInfo() {
         //ResultSet rs = stm.executeQuery("");
         for (Employee e : employeeList) {
-            e.toString();
+            System.out.println(e.toString());
         }
     }
 
@@ -74,9 +74,9 @@ public class EmployeeRepo {
                                 rs.getString("t_from_date"),
                                 rs.getString("t_to_date"))));
             }
-            for (Employee e : employeeList) {
-                System.out.println(e.toString());
-            }
+//            for (Employee e : employeeList) {
+//                System.out.println(e.toString());
+//            }
 //            while (rs.next()) {
 //                System.out.println(rs.getString("first_name") + " - " +
 //                        rs.getString("last_name") + " - " + "recent salary: " +
