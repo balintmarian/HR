@@ -1,11 +1,9 @@
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.Date;
 
 public class EmployeeRepo {
+    private SimpleDate d = new SimpleDate();
     private ArrayList<Employee> employeeList = new ArrayList<>();
     private Connection con = DBConnection.getConnection();
     private Statement stm = con.createStatement();
@@ -20,21 +18,21 @@ public class EmployeeRepo {
     public EmployeeRepo() throws SQLException {
     }
 
-    public Date getDate()  {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        //Scanner sc = new Scanner(System.in);
-        System.out.println("Example: 2018-12-10");
-        String str = sc.nextLine();
-        Date date = null;
-        try {
-            date = sdf.parse(str);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        return date;
-    }
+//    public SimpleDate getDate()  {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        //Scanner sc = new Scanner(System.in);
+//        System.out.println("Example: 2018-12-10");
+//        String str = sc.nextLine();
+//        SimpleDate date = null;
+//        try {
+//            date = sdf.parse(str);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        sdf = new SimpleDateFormat("yyyy-MM-dd");
+//
+//        return date;
+//    }
 
     public void printEmployeeInfo() {
         //ResultSet rs = stm.executeQuery("");
@@ -93,8 +91,8 @@ public class EmployeeRepo {
         //System.out.print("employ id: ");
         // int empId = sc.nextInt();
         //System.out.print("employ birth date: ");
-        //Date birthDate = Date.valueOf(sc.nextLine());
-        System.out.print("birth Date: ");
+        //SimpleDate birthDate = SimpleDate.valueOf(sc.nextLine());
+        System.out.print("birth SimpleDate: ");
         String birthDate = sc.next();
         System.out.print("first name: ");
         String firstName = sc.next();
@@ -107,36 +105,38 @@ public class EmployeeRepo {
 
         int empId = -1;
         try {
-
-            //TO DO: get last id from employees table
-            ResultSet rs1 = stm.executeQuery("select max(emp_no) as emp_no from employees");//lllllllllllllllllll
-            //System.out.println());
-            rs1.next();
-            empId = rs1.getInt("emp_no");
-            System.out.println(empId);
-            prepStmInser.setInt(1, empId + 1);
+            empId = generateEmployId();
+            prepStmInser.setInt(1, empId);
             //prepStmInser.setDate(1, birthDate);
             prepStmInser.setString(2, birthDate);
             prepStmInser.setString(3, firstName);
-            prepStmInser.setString(4, lastName);
+            prepStmInser.setString(4, lastName);//11201
             prepStmInser.setString(5, gender);
             prepStmInser.setString(6, hireDate);
 
             prepStmInser.execute();
-
-            System.out.println("this employee work in dept: ");
-            //String dept=sc.next();
-            //ResultSet rs2=stm.executeQuery("select * from departments where dept_name='Sales'");
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        //if i find the deprtment for this employee il add him to it, if not i create the department
 
-        String deptId = "0";
+        System.out.println("Does this employee work in a department? Yes/No");
+        String answer = sc.nextLine();
+        if (answer.toLowerCase().contains("no")) {
+            System.out.println("This employee doesn't work");
+        } else {
+            if (empId != -1) {
+                setEmployeeDepartment(empId);
+            }
+        }
+    }
+
+    public void setEmployeeDepartment(int empId) {
+
+        //if i find the deprtment for this employee ill add him to it, if not i create the department
+
+        String deptId=null ;
         try {
             String department = sc.next();
-            //String sql = "select dept_no from departments where dept_name=?";
-
             pstm.setString(1, department);
             pstm.execute();
             ResultSet rs = pstm.getResultSet();
@@ -157,18 +157,34 @@ public class EmployeeRepo {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        //todo: link the created employee to the corresponding department in dept_emp //DONE//
-        if (empId != -1) {
+
+        if (empId != -1 || deptId != null) {
             try {
                 pstm2.setInt(1, empId);
                 pstm2.setString(2, deptId);
-                pstm2.setDate(3,new java.sql.Date(getDate().getTime()));
-                pstm2.setDate(4, new java.sql.Date( getDate().getTime()));//date: 9999-01-01
+                System.out.println("Enter hire date: ");
+                pstm2.setDate(3, new java.sql.Date(d.createDate().getTime()));
+                pstm2.setDate(4, new java.sql.Date(d.getLastDate().getTime()));//date: 9999-01-01
                 pstm2.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public int generateEmployId() {
+        ResultSet rs1;
+        int empId = 0;
+        try {
+            rs1 = stm.executeQuery("select max(emp_no) as emp_no from employees");
+
+            //System.out.println());
+            rs1.next();
+            empId = rs1.getInt("emp_no");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return empId + 1;
     }
 
     public String generateDeptId(String lastDeptId) {
@@ -186,9 +202,11 @@ public class EmployeeRepo {
 
     public void deleteEmployee() {
 //ResultSet rs = stm.executeQuery("");
-        System.out.println("Enter the last name of the employee you want to delete: ");
+        System.out.print("Enter the first name of the employee you want to delete: ");
+
         String firstName = sc.nextLine();
-        System.out.println("Enter the first name of the employee you want to delete: first name");
+        System.out.print("Enter the last name of the employee you want to delete: ");
+
         String lastName = sc.nextLine();
 
         try {

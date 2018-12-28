@@ -1,6 +1,4 @@
 import java.sql.SQLException;
-import java.text.NumberFormat;
-import java.util.Locale;
 import java.util.Scanner;
 
 public class Tester {
@@ -21,6 +19,7 @@ public class Tester {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
     }
 
     public static void showMenu(EmployeeRepo employeeRepository) {
@@ -32,7 +31,7 @@ public class Tester {
         System.out.println("1. Add employee");
         System.out.println("2. Show List Employees");
         System.out.println("3. Remove employee");
-        //System.out.println("4. Show Hystory Employee");
+        //System.out.println("4. Show History Employee");
         System.out.println("4. Exit");
         showOptionsMenu(employeeRepository);
     }
